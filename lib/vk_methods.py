@@ -5,8 +5,8 @@ import requests
 import json
 import vk_api
 
-token = '190e4717df7e39b682e0b248d7e9b528ebe323dbdcfc2ec61db21c60449917c0b2ca6437e21c50bd49e37'
-user_id = '106131559'
+token = ''
+user_id = ''
 app_id = '7664884'
 
 vk_session = vk_api.VkApi(token=token)
