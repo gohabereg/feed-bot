@@ -18,13 +18,14 @@ bot.
 import logging
 import os
 
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Bot, Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 from pymongo import MongoClient
 from auth import AuthServer
 from urllib.parse import urlencode
 
 from dotenv import load_dotenv, find_dotenv
+import asyncio
 
 load_dotenv(find_dotenv())
 
@@ -71,6 +72,11 @@ def echo(update: Update, context: CallbackContext) -> None:
     update.message.reply_text(update.message.text)
 
 
+def auth_callback(tg_id):
+    bot = Bot(os.getenv('TG_BOT_TOKEN'))
+    bot.send_message(tg_id, "Вы успешно авторизовались!")
+
+
 def main():
     # client = MongoClient('db', username='root', password='root')
 
@@ -99,14 +105,7 @@ def main():
     # Run the bot until you press Ctrl-C or the process receives SIGINT,
     # SIGTERM or SIGABRT. This should be used most of the time, since
     # start_polling() is non-blocking and will stop the bot gracefully.
-    server = AuthServer()
-
-    try:
-        server.start()
-    except KeyboardInterrupt:
-        pass
-
-    server.stop()
+    server = AuthServer(auth_callback)
 
 
 if __name__ == '__main__':

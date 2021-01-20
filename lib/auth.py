@@ -1,38 +1,24 @@
-from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse, parse_qs, urlencode
-import requests
 import os
 from pymongo import MongoClient
+from aiohttp import web, ClientSession
 
 
-class MyHandler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        parse_result = urlparse(self.path)
-        parameters = parse_qs(parse_result.query)
+class AuthServer:
+    def __init__(self, callback, host='0.0.0.0', port=8080):
+        self.auth_callback = callback
+        self.app = web.Application()
+        self.app.add_routes([
+            web.get('/auth', self.handle_auth),
+            web.get('/callback', self.handle_callback)
+        ])
+        self.db = MongoClient('db', username='root', password='root')['bot']
 
-        print(self.path)
+        web.run_app(self.app)
 
-        if parse_result.path == '/auth':
-            self.auth(parameters['state'][0])
-        elif parse_result.path == '/callback':
-            code = parameters['code'][0]
-            tg_id = parameters['state'][0]
-            token, vk_id = self.get_token(code)
-            self.write_token_to_db(tg_id, vk_id, token)
-
-            self.send_response(302)
-            self.send_header("Location", "https://t.me/" +
-                             os.getenv('TG_BOT_USERNAME'))
-            self.end_headers()
-
-        else:
-            self.send_response(404)
-            self.send_header("Content-Type", "text/html")
-            self.end_headers()
-
-    def auth(self, state):
+    def handle_auth(self, request):
         qs = urlencode({
-            'state': state,
+            'state': request.query.get('state'),
             'client_id': os.getenv('VK_CLIENT_ID'),
             'redirect_uri': 'http://localhost:8080/callback',
             'response_type': 'code',
@@ -40,41 +26,32 @@ class MyHandler(BaseHTTPRequestHandler):
             'scope': 'wall'
         })
 
-        print(os.getenv('VK_CLIENT_ID'))
+        raise web.HTTPFound(location="https://oauth.vk.com/authorize?"+qs)
 
-        self.send_response(302)
-        self.send_header("Location", "https://oauth.vk.com/authorize?"+qs)
-        self.end_headers()
+    async def handle_callback(self, request):
+        code = request.query.get('code')
+        tg_id = request.query.get('state')
 
-    def get_token(self, code):
-        qs = urlencode({
+        access_token, vk_id = await self.get_token(code)
+
+        self.db.users.update({'tg_id': tg_id, 'vk_id': vk_id},
+                             {'tg_id': tg_id, 'vk_id': vk_id, 'vk_token': access_token}, True)
+
+        self.auth_callback(tg_id)
+
+        raise web.HTTPFound(location="https://t.me/" +
+                            os.getenv('TG_BOT_USERNAME'))
+
+    async def get_token(self, code):
+        params = {
             'client_id': os.getenv('VK_CLIENT_ID'),
             'client_secret': os.getenv('VK_CLIENT_SECRET'),
             'redirect_uri': 'http://localhost:8080/callback',
             'code': code,
-        })
-        r = requests.get('https://oauth.vk.com/access_token?' + qs)
-        json = r.json()
+        }
 
-        return json['access_token'], json['user_id']
+        async with ClientSession() as session:
+            async with session.get('https://oauth.vk.com/access_token', params=params) as response:
+                json = await response.json()
 
-    def write_token_to_db(self, tg_id, vk_id, access_token):
-        client = MongoClient('db', username='root', password='root')
-        db = client['bot']
-
-        users = db.users
-
-        users.update({'tg_id': tg_id, 'vk_id': vk_id},
-                     {'tg_id': tg_id, 'vk_id': vk_id, 'vk_token': access_token}, True)
-
-
-class AuthServer:
-    def __init__(self, host='0.0.0.0', port=8080):
-        self.server = HTTPServer(
-            (host, port), MyHandler)
-
-    def start(self):
-        self.server.serve_forever()
-
-    def stop(self):
-        self.server.server_close()
+                return json['access_token'], json['user_id']
