@@ -45,7 +45,7 @@ def start(update: Update, context: CallbackContext) -> None:
     qs = urlencode({
         'state': update.message.from_user.id,
         'client_id': os.getenv('VK_CLIENT_ID'),
-        'redirect_uri': 'http://' + os.getenv('HOST') + ':' + os.getenv('AUTH_PORT') +  '/callback',
+        'redirect_uri': os.getenv('AUTH_URL') + '/callback',
         'response_type': 'code',
         'v': 5.126,
         'scope': 'wall'

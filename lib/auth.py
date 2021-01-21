@@ -20,7 +20,7 @@ class AuthServer:
         qs = urlencode({
             'state': request.query.get('state'),
             'client_id': os.getenv('VK_CLIENT_ID'),
-            'redirect_uri': 'http://' + os.getenv('HOST') + ':' + os.getenv('AUTH_PORT') + '/callback',
+            'redirect_uri': os.getenv('AUTH_URL') + '/callback',
             'response_type': 'code',
             'v': 5.126,
             'scope': 'wall'
@@ -46,7 +46,7 @@ class AuthServer:
         params = {
             'client_id': os.getenv('VK_CLIENT_ID'),
             'client_secret': os.getenv('VK_CLIENT_SECRET'),
-            'redirect_uri': 'http://' + os.getenv('HOST') + ':' + os.getenv('AUTH_PORT') + '/callback',
+            'redirect_uri': os.getenv('AUTH_URL') + '/callback',
             'code': code,
         }
 
