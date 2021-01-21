@@ -3,3 +3,4 @@ vk_api
 python-dotenv
 aiohttp
 pymongo[tls]
+dnspython
