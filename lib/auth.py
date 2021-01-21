@@ -14,7 +14,7 @@ class AuthServer:
         ])
         self.db = MongoClient('db', username='root', password='root')['bot']
 
-        web.run_app(self.app)
+        web.run_app(self.app, port=os.getenv('PORT'))
 
     def handle_auth(self, request):
         qs = urlencode({
