@@ -12,7 +12,7 @@ class AuthServer:
             web.get('/auth', self.handle_auth),
             web.get('/callback', self.handle_callback)
         ])
-        self.db = MongoClient('db', username='root', password='root')['bot']
+        self.db = MongoClient(os.getenv('MONGO_URL'))['bot']
 
         web.run_app(self.app, port=os.getenv('PORT'))
 
