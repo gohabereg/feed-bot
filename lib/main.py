@@ -27,7 +27,9 @@ from urllib.parse import urlencode
 from dotenv import load_dotenv, find_dotenv
 import asyncio
 
-load_dotenv(find_dotenv())
+load_dotenv(find_dotenv('.env.my'))
+
+global_vktoken = ''
 
 # Enable logging
 logging.basicConfig(
@@ -76,11 +78,16 @@ def auth_callback(tg_id):
     bot = Bot(os.getenv('TG_BOT_TOKEN'))
     bot.send_message(tg_id, "Вы успешно авторизовались!")
 
+    client = MongoClient('db', username='root', password='root')
+    db = client['bot']
+    doc = db.users.find({})
+    for i in doc:
+        global_vktoken = str(i["vk_token"])
+        print(global_vktoken)
+        os.environ['VK_TOKEN'] = str(i["vk_token"])
 
 def main():
-    # client = MongoClient('db', username='root', password='root')
 
-    # db = client['bot']
     """Start the bot."""
     # Create the Updater and pass it your bot's token.
     # Make sure to set use_context=True to use the new context based callbacks
