@@ -20,14 +20,12 @@ class VkMethods:
         client = MongoClient('db', username='root', password='root')
         db = client['bot']
         doc = db.users.find({}, {"vk_id": 1, "vk_token": 1})
-        print(doc);
         for i in doc:
             user_list.append(str(i["vk_id"]))
             user_list.append(str(i["vk_token"]))
 
         list_length = len(user_list)
         print(user_list[0:list_length])
-
         return user_list
 
     def loadNews(self, vk_token):
