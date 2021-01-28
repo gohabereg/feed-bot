@@ -23,13 +23,12 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, Callb
 from pymongo import MongoClient
 from auth import AuthServer
 from urllib.parse import urlencode
+from vk_methods import VkMethods
 
 from dotenv import load_dotenv, find_dotenv
 import asyncio
 
 load_dotenv(find_dotenv('.env.my'))
-
-global_vktoken = ''
 
 # Enable logging
 logging.basicConfig(
@@ -78,13 +77,9 @@ def auth_callback(tg_id):
     bot = Bot(os.getenv('TG_BOT_TOKEN'))
     bot.send_message(tg_id, "Вы успешно авторизовались!")
 
-    client = MongoClient('db', username='root', password='root')
-    db = client['bot']
-    doc = db.users.find({})
-    for i in doc:
-        global_vktoken = str(i["vk_token"])
-        print(global_vktoken)
-        os.environ['VK_TOKEN'] = str(i["vk_token"])
+    vkmeth = VkMethods()
+    user_data = vkmeth.getUserData()
+    bot.send_media_group(tg_id, vkmeth.loadNews(str(user_data[1])))
 
 def main():
 

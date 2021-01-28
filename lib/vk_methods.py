@@ -2,22 +2,39 @@ import requests
 import json
 import vk_api
 import os
+from pymongo import MongoClient
+
 
 class VkMethods:
 
-    vk_session = vk_api.VkApi(token=os.getenv('VK_TOKEN'))
-    vk = vk_session.get_api()
-
-    # def write_json(data, filename):
-    #     with open(filename, 'w') as file:
-    #         json.dump(data, file, indent=2)
+    def write_json(data, filename):
+        with open(filename, 'w') as file:
+            json.dump(data, file, indent=2)
 
     # def loadProfile():
     #     response = vk.users.get(user_ids=user_id, fields='photo_100')
     #     return response
 
-    def loadNews():
+    def getUserData(self):
+        user_list = []
+        client = MongoClient('db', username='root', password='root')
+        db = client['bot']
+        doc = db.users.find({}, {"vk_id": 1, "vk_token": 1})
+        print(doc);
+        for i in doc:
+            user_list.append(str(i["vk_id"]))
+            user_list.append(str(i["vk_token"]))
+
+        list_length = len(user_list)
+        print(user_list[0:list_length])
+
+        return user_list
+
+    def loadNews(self, vk_token):
+        vk_session = vk_api.VkApi(token=vk_token)
+        vk = vk_session.get_api()
         response = vk.newsfeed.get(filters='post', count=10)
+        print(response)
         return response
 
     #print(vk.users.get(user_ids=user_id, fields='photo_100'))

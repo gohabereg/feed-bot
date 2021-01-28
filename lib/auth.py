@@ -23,7 +23,7 @@ class AuthServer:
             'redirect_uri': os.getenv('AUTH_URL') + '/callback',
             'response_type': 'code',
             'v': 5.126,
-            'scope': 'wall'
+            'scope': ['groups','stories','wall']
         })
 
         raise web.HTTPFound(location="https://oauth.vk.com/authorize?"+qs)
