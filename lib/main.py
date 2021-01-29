@@ -75,11 +75,14 @@ def echo(update: Update, context: CallbackContext) -> None:
 
 def auth_callback(tg_id):
     bot = Bot(os.getenv('TG_BOT_TOKEN'))
+    user_data = VkMethods.response
     bot.send_message(tg_id, "Вы успешно авторизовались!")
+    print(user_data)
 
     vkmeth = VkMethods()
-    user_data = vkmeth.getUserData()
-    bot.send_media_group(tg_id, vkmeth.loadNews(str(user_data[1])))
+    vk_session = vkmeth.auth_vk_token()
+    resp = vkmeth.loadNews(vk_session)
+    bot.send_media_group(tg_id, resp)
 
 def main():
 

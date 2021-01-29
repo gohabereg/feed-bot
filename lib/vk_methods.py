@@ -1,11 +1,31 @@
 import requests
 import json
 import vk_api
+import vk
 import os
 from pymongo import MongoClient
 
 
 class VkMethods:
+    def auth_vk_password(self):
+        session = vk.AuthSession(app_id=os.getenv('VK_CLIENT_ID'),
+                                 user_login=input(os.getenv('VK_LOGIN')),
+                                 user_password=input(os.getenv('VK_PASSWORD')))
+        file = open("auth_vk.ini", 'w')
+        file.writelines(session.access_token)
+        return session
+
+    def auth_vk_token(self):
+        try:
+            file = open("auth_vk.ini", 'r')
+        except IOError as e:
+            access_token = self.auth_vk_password().access_token
+        else:
+            access_token = file.readline()
+
+        session = vk.Session(access_token=access_token)
+
+        return session
 
     def write_json(data, filename):
         with open(filename, 'w') as file:
@@ -28,10 +48,10 @@ class VkMethods:
         print(user_list[0:list_length])
         return user_list
 
-    def loadNews(self, vk_token):
-        vk_session = vk_api.VkApi(token=vk_token)
-        vk = vk_session.get_api()
-        response = vk.newsfeed.get(filters='post', count=10)
+    def loadNews(self, session):
+        # vk_session = vk_api.VkApi(token=vk_token)
+        vk_check = session.get_api()
+        response = vk_check.newsfeed.get(filters='post', count=10)
         print(response)
         return response
 
