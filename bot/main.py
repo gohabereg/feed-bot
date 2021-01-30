@@ -26,6 +26,7 @@ from urllib.parse import urlencode
 from .vk.api import VkApi
 from .vk.scheduler import Scheduler
 from .helpers import create_reply_markup
+from vk_api.exceptions import BadPassword, TwoFactorError, SecurityCheck
 
 from dotenv import load_dotenv, find_dotenv
 import asyncio
@@ -63,22 +64,29 @@ class Bot:
 
     def start_command(self, update: Update, context: CallbackContext) -> None:
         update.message.reply_text(
-            'Привет!\nЧтобы авторизоваться, используй команду <code>/login email password</code>.\nЕсли у вас включено подтверждение входа, отключите его, чтобы использовать бота.\n\nP.S. Ваш пароль используется только один раз для авторизации и не сохраняется в базе.', parse_mode='HTML')
+            'Привет!\nЧтобы авторизоваться, используй команду <code>/login login password</code>.\nЕсли у вас включено подтверждение входа, отключите его, чтобы использовать бота.\n\nP.S. Ваш пароль используется только один раз для авторизации и не сохраняется в базе.', parse_mode='HTML')
 
     def help_command(self, update: Update, context: CallbackContext) -> None:
         update.message.reply_text(
             'Этот бот будет будет присылать вам новости с вашей ленты в ВК (с небольшой задержкой).\n\nВы можете лайкнуть, репостнуть или добавить запись в избранное, используя кнопки под постами.')
 
     def login_command(self, update: Update, context: CallbackContext) -> None:
-        cmd, login, password = update.message.text.split(' ')
-        start_time = int(time.time())
+        entities = update.message.text.split(' ')
 
-        self.db.users.update_one({'tg_id': update.message.from_user.id, 'login': login}, {'$set': {
-            'tg_id': update.message.from_user.id, 'login': login, 'start_time': start_time}}, upsert=True)
+        if (len(entities) < 3):
+            update.message.reply_text(
+                'Пожалуйста введите команду в формате <code>/login login password</code>', parse_mode="HTML")
+            return
+
+        cmd, login, password = entities
+        start_time = int(time.time())
 
         try:
             vk = VkApi(login, password)
             info = vk.get_profile_info()
+
+            self.db.users.update_one({'tg_id': update.message.from_user.id, 'login': login}, {'$set': {
+                'tg_id': update.message.from_user.id, 'login': login, 'start_time': start_time}}, upsert=True)
 
             update.message.reply_text(
                 'Вы авторизовались как {} {}'.format(info.first_name, info.last_name))
@@ -87,6 +95,12 @@ class Bot:
 
             scheduler.send_news(update.message.from_user.id,
                                 login, start_time - 10 * 60)
+        except BadPassword as e:
+            update.message.reply_text('Введен неверный пароль')
+        except TwoFactorError as e:
+            update.message.reply_text('Чтобы пользоваться ботом, отключите подтвеждение входа в настройках ВКонтакте')
+        except SecurityCheck as e:
+            update.message.reply_text('Пожалуйста, воспользуйтесь телефоном в качестве логина')
         except Exception as e:
             print(e)
             update.message.reply_text('Произошла ошибка, попобуйте снова')
