@@ -84,4 +84,4 @@ class Scheduler:
                     tg_id, media=media)
 
             self.bot.send_message(
-                tg_id, text, parse_mode='HTML', reply_markup=markup)
+                tg_id, text, parse_mode='HTML', reply_markup=markup, disable_web_page_preview=len(media) > 0)
