@@ -1,1 +1,1 @@
-web: python3 lib/main.py
+web: python3 -m bot.main
