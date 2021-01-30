@@ -26,7 +26,6 @@ from urllib.parse import urlencode
 from .vk.api import VkApi
 from .vk.scheduler import Scheduler
 from .helpers import create_reply_markup
-from .auth import AuthServer
 
 from dotenv import load_dotenv, find_dotenv
 import asyncio
@@ -59,11 +58,6 @@ class Bot:
         self.updater.start_polling()
         self.scheduler.run()
         self.updater.idle()
-
-        def cb():
-            pass
-
-        auth = AuthServer(callback=cb)
 
         pass
 
