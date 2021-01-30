@@ -2,6 +2,7 @@ from .profile import Profile
 from .group import Group
 from .post import Post
 
+
 class NewsFeed:
     def __init__(self, api_response):
         self.profiles = list(
@@ -13,5 +14,4 @@ class NewsFeed:
         else:
             self.next_from = None
         self.items = list(map(lambda item: Post(
-            item, self.groups, self.profiles), api_response['items']))
-
+            item, self.groups, self.profiles), api_response['items'])).reverse()

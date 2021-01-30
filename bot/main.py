@@ -77,7 +77,7 @@ class Bot:
 
     def login_command(self, update: Update, context: CallbackContext) -> None:
         cmd, login, password = update.message.text.split(' ')
-        start_time = time.time()
+        start_time = int(time.time())
 
         self.db.users.update_one({'tg_id': update.message.from_user.id, 'login': login}, {'$set': {
             'tg_id': update.message.from_user.id, 'login': login, 'start_time': start_time}}, upsert=True)

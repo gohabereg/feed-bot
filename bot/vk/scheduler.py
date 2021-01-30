@@ -39,6 +39,7 @@ class Scheduler:
         users = self.get_users()
 
         for user in users:
+            print(user)
             tg_id = user['tg_id']
             login = user['login']
             start_time = user['start_time']
@@ -46,6 +47,7 @@ class Scheduler:
             self.update_start_time(tg_id, login)
 
             self.send_news(tg_id, login, start_time)
+            print('news sent')
 
     def send_news(self, tg_id, login, start_time):
         vk = VkApi(login)
