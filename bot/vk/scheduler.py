@@ -4,6 +4,7 @@ from threading import Timer
 import os
 import time
 from .api import VkApi
+from vk_api.exceptions import AuthException
 from ..helpers import create_reply_markup
 
 
@@ -51,6 +52,9 @@ class Scheduler:
                 print('news sent')
             except Exception as e:
                 print(e)
+            except AuthException as e:
+                self.bot.send_message(
+                    tg_id, 'Срок действия токена истек, пожалуйста авторизуйтесь еще раз с помощью команды /login')
 
         self.running = False
         self.run()
