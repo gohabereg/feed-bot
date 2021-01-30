@@ -14,4 +14,5 @@ class NewsFeed:
         else:
             self.next_from = None
         self.items = list(map(lambda item: Post(
-            item, self.groups, self.profiles), api_response['items'])).reverse()
+            item, self.groups, self.profiles), api_response['items']))
+        self.items.reverse()
