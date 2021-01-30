@@ -54,7 +54,7 @@ class Scheduler:
             # except Exception as e:
             #     print(e)
             except ApiError as e:
-                if (self.error_sent[tg_id]):
+                if (tg_id in self.error_sent):
                     pass
 
                 if (str(e).startswith('[5] User authorization failed')):
