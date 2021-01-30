@@ -3,7 +3,6 @@ class Group:
         self.id = api_response['id']
         self.name = api_response['name']
         self.screen_name = api_response['screen_name']
-        self.is_closed = bool(api_response['is_closed'])
         self.type = api_response['type']
         self.photo_50 = api_response['photo_50']
         self.photo_100 = api_response['photo_100']

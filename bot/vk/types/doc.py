@@ -1,8 +1,8 @@
 from .doc_type import DocType
 
+
 class Doc:
     def __init__(self, api_response):
-        print(api_response)
         self.id = api_response['id']
         self.owner_id = api_response['owner_id']
         self.title = api_response['title']

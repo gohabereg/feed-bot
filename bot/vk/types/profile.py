@@ -7,7 +7,6 @@ class Profile:
         self.first_name = api_response['first_name']
         self.id = api_response['id']
         self.last_name = api_response['last_name']
-        self.is_closed = api_response['is_closed']
         self.sex = Sex(api_response['sex'])
         self.screen_name = api_response['screen_name']
         self.photo_50 = api_response['photo_50']
