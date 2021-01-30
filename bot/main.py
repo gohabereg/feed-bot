@@ -26,7 +26,7 @@ from urllib.parse import urlencode
 from .vk.api import VkApi
 from .vk.scheduler import Scheduler
 from .helpers import create_reply_markup
-from vk_api.exceptions import BadPassword, TwoFactorError, SecurityCheck
+from vk_api.exceptions import BadPassword, TwoFactorError, SecurityCheck, Captcha
 
 from dotenv import load_dotenv, find_dotenv
 import asyncio
@@ -54,6 +54,7 @@ class Bot:
 
         self.db = MongoClient(os.getenv('MONGO_URL'))['bot']
         self.scheduler = Scheduler()
+        self.captcha = {}
 
     def run(self):
         self.updater.start_polling()
@@ -98,12 +99,24 @@ class Bot:
         except BadPassword as e:
             update.message.reply_text('Введен неверный пароль')
         except TwoFactorError as e:
-            update.message.reply_text('Чтобы пользоваться ботом, отключите подтвеждение входа в настройках ВКонтакте')
+            update.message.reply_text(
+                'Чтобы пользоваться ботом, отключите подтвеждение входа в настройках ВКонтакте')
         except SecurityCheck as e:
-            update.message.reply_text('Пожалуйста, воспользуйтесь телефоном в качестве логина')
+            update.message.reply_text(
+                'Пожалуйста, воспользуйтесь телефоном в качестве логина')
+        except Captcha as e:
+            update.message.reply_photo(
+                e.get_url(), caption='Пожалуйста, введите код с картинки командой /captcha <code>')
+            context.user_data['captcha'] = e
         except Exception as e:
             print(e)
             update.message.reply_text('Произошла ошибка, попобуйте снова')
+
+    def captcha_command(self, update: Update, context: CallbackContext) -> None:
+        captcha = context.user_data['captcha']
+        cmd, code = update.message.text.split(' ')
+
+        captcha.try_again(code)
 
     def callback_query(self, update: Update, context: CallbackContext) -> None:
         user = self.db.users.find_one(
