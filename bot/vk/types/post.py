@@ -66,3 +66,7 @@ class Post:
     @ property
     def videos(self):
         return list(filter(lambda x: x.type == 'video', self.attachments))
+
+    @property
+    def docs(self):
+        return list(filter(lambda x: x.type == 'doc', self.attachments))

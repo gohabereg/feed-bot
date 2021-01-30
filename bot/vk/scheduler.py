@@ -95,5 +95,9 @@ class Scheduler:
                 self.bot.send_media_group(
                     tg_id, media=media)
 
+            if len(post.docs):
+                for doc in post.docs:
+                    self.bot.send_document(tg_id, doc.item.url, filename=doc.item.title)
+
             self.bot.send_message(
                 tg_id, text, parse_mode='HTML', reply_markup=markup, disable_web_page_preview=len(media) > 0)
