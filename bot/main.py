@@ -47,6 +47,8 @@ class Bot:
         self.dispatcher = self.updater.dispatcher
         self.dispatcher.add_handler(
             CommandHandler('start', self.start_command))
+        self.dispatcher.add_handler(
+            CommandHandler('captcha', self.captcha_command))
         self.dispatcher.add_handler(CommandHandler('help', self.help_command))
         self.dispatcher.add_handler(
             CommandHandler('login', self.login_command))
