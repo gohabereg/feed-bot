@@ -145,7 +145,7 @@ class Bot:
                 result = vk.like_add(owner_id, post_id)
                 likes.count = result.likes
                 likes.user_likes = True
-                query.answer('Вы лайкнули поста')
+                query.answer('Вы лайкнули пост')
         elif command == 'repost':
             if post.reposts.user_reposted:
                 query.answer('Вы уже репостнули эту запись')
@@ -163,7 +163,7 @@ class Bot:
                 else:
                     query.answer('Произошла ошибка')
             else:
-                is_favorite = vk.fave_remove_post(owner_id, post_id)
+                is_favorite = vk.fave_add_post(owner_id, post_id)
                 if is_favorite:
                     query.answer('Вы добвили пост в избранное')
                 else:
