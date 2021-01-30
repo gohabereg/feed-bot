@@ -44,10 +44,13 @@ class Scheduler:
             login = user['login']
             start_time = user['start_time']
 
-            self.update_start_time(tg_id, login)
+            try:
+                self.update_start_time(tg_id, login)
 
-            self.send_news(tg_id, login, start_time)
-            print('news sent')
+                self.send_news(tg_id, login, start_time)
+                print('news sent')
+            except Exception as e:
+                print(e)
 
     def send_news(self, tg_id, login, start_time):
         vk = VkApi(login)
