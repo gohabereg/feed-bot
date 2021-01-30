@@ -4,7 +4,7 @@ from threading import Timer
 import os
 import time
 from .api import VkApi
-from vk_api.exceptions import AuthError
+from vk_api.exceptions import ApiError
 from ..helpers import create_reply_markup
 
 
@@ -50,11 +50,15 @@ class Scheduler:
 
                 self.send_news(tg_id, login, start_time)
                 print('news sent')
-            except Exception as e:
-                print(e)
-            except AuthError as e:
-                self.bot.send_message(
-                    tg_id, 'Срок действия токена истек, пожалуйста авторизуйтесь еще раз с помощью команды /login')
+            # except Exception as e:
+            #     print(e)
+            except ApiError as e:
+                if (str(e).startswith('[5] User authorization failed')):
+                    self.bot.send_message(
+                        tg_id, 'Срок действия токена истек, пожалуйста авторизуйтесь еще раз с помощью команды /login')
+                else:
+                    self.bot.send_message(
+                        tg_id, 'Произошла ошибка при обращении к API ВКонтакте')
 
         self.running = False
         self.run()
