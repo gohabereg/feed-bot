@@ -2,6 +2,7 @@ from .attachment import Attachment
 from .likes import Likes
 from .reposts import Reposts
 
+
 class Post:
     def __init__(self, api_response, groups=[], profiles=[]):
         self.groups = groups
@@ -9,6 +10,12 @@ class Post:
         self.source_id = api_response['source_id'] if 'source_id' in api_response else api_response['owner_id']
         self.date = api_response['date']
         self.text = api_response['text']
+
+        if 'copy_history' in api_response:
+            self.copy_history = list(map(lambda post: Post(
+                post, groups, profiles), api_response['copy_history']))
+        else:
+            self.copy_history = []
 
         if 'marked_as_ads' in api_response:
             self.marked_as_ads = api_response['marked_as_ads']
@@ -21,10 +28,16 @@ class Post:
         else:
             self.attachments = []
 
-        self.likes = Likes(api_response['likes'])
-        self.is_favorite = bool(api_response['is_favorite'])
+        if 'likes' in api_response:
+            self.likes = Likes(api_response['likes'])
+        else:
+            self.likes = Likes(
+                {'count': 0, 'user_likes': 0, 'can_like': 0, 'can_publish': 0})
+        self.is_favorite = bool(
+            api_response['is_favorite']) if 'is_favorite' in api_response else False
         self.post_id = api_response['post_id'] if 'post_id' in api_response else api_response['id']
-        self.reposts = Reposts(api_response['reposts'])
+        self.reposts = Reposts(api_response['reposts']) if 'reposts' is api_response else Reposts(
+            {'count': 0, 'user_reposted': 0})
 
     @ property
     def url(self):

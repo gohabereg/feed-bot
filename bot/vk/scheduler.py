@@ -41,7 +41,6 @@ class Scheduler:
         users = self.get_users()
 
         for user in users:
-            print(user)
             tg_id = user['tg_id']
             login = user['login']
             start_time = user['start_time']
@@ -50,7 +49,6 @@ class Scheduler:
                 self.update_start_time(tg_id, login)
 
                 self.send_news(tg_id, login, start_time)
-                print('news sent')
             # except Exception as e:
             #     print(e)
             except ApiError as e:
@@ -73,23 +71,7 @@ class Scheduler:
         news = vk.get_newsfeed(start_time)
 
         for post in news.items:
-            text = post.full_text
-            media = []
-
-            if len(post.videos):
-                for video in post.videos:
-                    if video.player:
-                        text += "\n\n{}".format(video.player)
-                    else:
-                        text += "\n\n{}".format(vk.get_video(video.owner_ud,
-                                                             video.id, video.access_key).player)
-
-            if len(post.photos):
-                media = list(map(lambda attachments: InputMediaPhoto(
-                    attachments.item.url, parse_mode='HTML'), post.photos))
-
-            markup = create_reply_markup(
-                post.likes, post.reposts, post.is_favorite, post.source_id, post.post_id)
+            text, media, markup = self.get_post_contents(vk, post)
 
             if len(media) > 0:
                 self.bot.send_media_group(
@@ -102,3 +84,32 @@ class Scheduler:
 
             self.bot.send_message(
                 tg_id, text, parse_mode='HTML', reply_markup=markup, disable_web_page_preview=len(post.links) == 0)
+
+    def get_post_contents(self, vk, post):
+        text = post.full_text
+        media = []
+
+        if len(post.videos):
+            for video in post.videos:
+                if video.player:
+                    text += "\n\n{}".format(video.player)
+                else:
+                    text += "\n\n{}".format(vk.get_video(video.owner_ud,
+                                                         video.id, video.access_key).player)
+
+        if len(post.photos):
+            media = list(map(lambda attachments: InputMediaPhoto(
+                attachments.item.url, parse_mode='HTML'), post.photos))
+
+        if len(post.copy_history):
+            copy_post = post.copy_history[0]
+            copy_text, copy_media, copy_markup = self.get_post_contents(
+                vk, copy_post)
+
+            text += '\n\nРепост записи:\n{}'.format(copy_text)
+            media.extend(copy_media)
+
+        markup = create_reply_markup(
+            post.likes, post.reposts, post.is_favorite, post.source_id, post.post_id)
+
+        return text, media, markup
