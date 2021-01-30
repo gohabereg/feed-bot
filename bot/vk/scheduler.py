@@ -89,13 +89,13 @@ class Scheduler:
         text = post.full_text
         media = []
 
-        if len(post.videos):
-            for video in post.videos:
-                if video.player:
-                    text += "\n\n{}".format(video.player)
-                else:
-                    text += "\n\n{}".format(vk.get_video(video.owner_ud,
-                                                         video.id, video.access_key).player)
+        # if len(post.videos):
+        #     for video in post.videos:
+        #         if video.player:
+        #             text += "\n\n{}".format(video.player)
+        #         else:
+        #             text += "\n\n{}".format(vk.get_video(video.owner_ud,
+        #                                                  video.id, video.access_key).player)
 
         if len(post.photos):
             media = list(map(lambda attachments: InputMediaPhoto(
