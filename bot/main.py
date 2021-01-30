@@ -60,7 +60,7 @@ class Bot:
         self.scheduler.run()
         self.updater.idle()
 
-        def cb:
+        def cb():
             pass
 
         auth = AuthServer(callback=cb)
