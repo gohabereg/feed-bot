@@ -13,6 +13,7 @@ class Scheduler:
         self.db = MongoClient(os.getenv('MONGO_URL'))['bot']
         self.bot = Bot(os.getenv('TG_BOT_TOKEN'))
         self.running = False
+        self.error_sent = {}
 
     def run(self):
         if self.running:
@@ -53,12 +54,17 @@ class Scheduler:
             # except Exception as e:
             #     print(e)
             except ApiError as e:
+                if (self.error_sent[tg_id]):
+                    pass
+
                 if (str(e).startswith('[5] User authorization failed')):
                     self.bot.send_message(
                         tg_id, 'Срок действия токена истек, пожалуйста авторизуйтесь еще раз с помощью команды /login')
                 else:
                     self.bot.send_message(
                         tg_id, 'Произошла ошибка при обращении к API ВКонтакте')
+
+                self.error_sent[tg_id] = True
 
         self.running = False
         self.run()
