@@ -52,6 +52,9 @@ class Scheduler:
             except Exception as e:
                 print(e)
 
+        self.running = False
+        self.run()
+
     def send_news(self, tg_id, login, start_time):
         vk = VkApi(login)
 
