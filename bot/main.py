@@ -63,7 +63,7 @@ class Bot:
 
     def start_command(self, update: Update, context: CallbackContext) -> None:
         update.message.reply_text(
-            'Привет!\nЧтобы авторизоваться, используй команду <code>/login email password</code>\n\nP.S. Ваш пароль используется только один раз для авторизации и не сохраняется в базе.', parse_mode='HTML')
+            'Привет!\nЧтобы авторизоваться, используй команду <code>/login email password</code>.\nЕсли у вас включено подтверждение входа, отключите его, чтобы использовать бота.\n\nP.S. Ваш пароль используется только один раз для авторизации и не сохраняется в базе.', parse_mode='HTML')
 
     def help_command(self, update: Update, context: CallbackContext) -> None:
         update.message.reply_text(
