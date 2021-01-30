@@ -6,4 +6,4 @@ RUN pip install -r requirements.txt --no-cache-dir
 EXPOSE 5000
 EXPOSE 8080
 COPY . .
-CMD ["npx", "nodemon", "--exec", "python3 -u", "./lib/main.py"]
+CMD ["npx", "nodemon", "--exec", "python3 -u -m", "bot.main"]
